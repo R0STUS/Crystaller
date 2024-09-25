@@ -1,1 +1,1 @@
-Edit the 'settings.file' to change Max. Memory limit for proccess.
+Create and Edit the 'settings.file' to change Max. Memory limit for proccess.
