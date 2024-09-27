@@ -38,12 +38,15 @@ int main() {
     long maxMem = 2560;
     std::string tmp;
     std::ifstream settingsFile;
-    settingsFile.open("MemoryMax.txt");
-    if (settingsFile) {
+    settingsFile.open("settings.file");
+    if (!settingsFile) {
+    }
+    else {
         settingsFile >> tmp;
         maxMem = stol(tmp);
     }
     settingsFile.clear();
+    settingsFile.close();
     tmp.clear();
     tmp.shrink_to_fit();
     std::cout << "Max. Memory for proccess: " << maxMem << std::endl;
