@@ -32,4 +32,4 @@
 *.app
 
 # Config
-*.file
+*.properties
