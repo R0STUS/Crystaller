@@ -33,3 +33,5 @@
 
 # Config
 *.properties
+*.properties
+settings.properties
