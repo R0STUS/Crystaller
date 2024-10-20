@@ -35,6 +35,27 @@ std::vector<std::tuple<long, long, std::string>> get_process_memory_usage() {
     return result;
 }
 
+std::string getAfterLine(std::string line) {
+    bool getName = false;
+    std::string str = "";
+    for (char c : line) {
+        if (getName == true) {
+            str += c;
+        }
+        if (c == '=') {
+            getName = true;
+        }
+    }
+    return str;
+}
+bool isDigital(std::string str) {
+    for (char c : str) {
+        if (!std::isdigit(c)) {
+            return false;
+        }
+    }
+    return true;
+}
 
 int main() {
     if (isRunningAsRoot()) {
@@ -68,17 +89,8 @@ int main() {
                 }
                 else if (c == '=' && !sType.empty()) {
                     if (sType == "maxMem") {
-                        bool getLong = false;
-                        sType = "";
-                        for (char c2 : tmp) {
-                            if (getLong == true && std::isdigit(c2)) {
-                                sType += c2;
-                            }
-                            if (c2 == '=') {
-                                getLong = true;
-                            }
-                        }
-                        if (!sType.empty()) {
+                        sType = getAfterLine(tmp);
+                        if (!sType.empty() && isDigital(sType)) {
                             maxMem = std::__cxx11::stol(sType);
                         }
                         else
@@ -86,16 +98,7 @@ int main() {
                         break;
                     }
                     if (sType == "ignoreName") {
-                        bool getName = false;
-                        sType = "";
-                        for (char c2 : tmp) {
-                            if (getName == true) {
-                                sType += c2;
-                            }
-                            if (c2 == '=') {
-                                getName = true;
-                            }
-                        }
+                        sType = getAfterLine(tmp);
                         if (!sType.empty()) {
                             ignoringNames.push_back(sType);
                             std::cout << sType << " ignoring." << std::endl;
