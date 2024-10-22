@@ -10,3 +10,8 @@ ignoreName=vesktop
 ignoreName=telegram-desktop
 ignoreName=chrome
 ```
+
+- sleepTime - time in seconds (float also supported) before start (can be used for debug)
+```properties
+sleepTime=2
+```
