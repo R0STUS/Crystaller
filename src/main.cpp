@@ -35,6 +35,19 @@ std::vector<std::tuple<long, long, std::string>> get_process_memory_usage() {
     return result;
 }
 
+std::string getNext(std::string tmp) {
+    bool getStr = false;
+    std::string sType = "";
+    for (char c2 : tmp) {
+        if (getStr == true) {
+            sType += c2;
+        }
+        if (c2 == '=') {
+            getStr = true;
+        }
+    }
+    return sType;
+}
 
 int main() {
     if (isRunningAsRoot()) {
@@ -43,23 +56,28 @@ int main() {
     }
     system("clear");
     long proccesMemNow;
+    long sleepTime = 1;
     long proccesNameNow;
     std::string proccesNameStrNow;
     std::string proccesPidNow;
     std::string command = "kill ";
     long long checkNum = 0;
     long maxMem;
+    bool maxMemBool = false;
     std::string tmp;
     std::ifstream settingsFile;
     std::ifstream patchFile;
     std::string sType;
     std::vector<std::string> ignoringNames;
+    std::vector<std::string> killedProccesses;
     bool isSkipPID;
     std::string checkerStr = "";
     std::string ignoreStr = "";
+    std::string killedProccessesPatch = "";
     long maxMemD;
     bool maxMemDBool = false;
-    settingsFile.open("settings.properties");
+    std::string settingsFilename;
+    bool settingsFilenameBool = false;
     patchFile.open("patch.properties");
     if (!patchFile) {
         std::cout << "\n    FATAL: Cannot open patch.properties." << std::endl;
@@ -74,16 +92,7 @@ int main() {
                 }
                 else if (c == '=' && !sType.empty()) {
                     if (sType == "ignoring") {
-                        bool getStr = false;
-                        sType = "";
-                        for (char c2 : tmp) {
-                            if (getStr == true) {
-                                sType += c2;
-                            }
-                            if (c2 == '=') {
-                                getStr = true;
-                            }
-                        }
+                        sType = getNext(tmp);
                         if (!sType.empty()) {
                             ignoreStr = sType;
                         }
@@ -106,6 +115,28 @@ int main() {
                         break;
                     }
                     else if (sType == "maxMemD") {
+                        sType = getNext(tmp);
+                        if (!sType.empty()) {
+                            maxMemD = std::__cxx11::stol(sType);
+                            maxMemDBool = true;
+                        }
+                        else {
+                            std::cout << "\n    FATAL: 'maxMemD' cannot be empty.";
+                        }
+                        break;
+                    }
+                    else if (sType == "settingsFilename") {
+                        sType = getNext(tmp);
+                        if (!sType.empty()) {
+                            settingsFilename = sType;
+                            settingsFilenameBool = true;
+                        }
+                        else {
+                            std::cout << "\n    FATAL: 'settingsFilename' cannot be empty.";
+                        }
+                        break;
+                    }
+                    else if (sType == "killedProccessesPatch") {
                         bool getStr = false;
                         sType = "";
                         for (char c2 : tmp) {
@@ -117,11 +148,7 @@ int main() {
                             }
                         }
                         if (!sType.empty()) {
-                            maxMemD = std::__cxx11::stol(sType);
-                            maxMemDBool = true;
-                        }
-                        else {
-                            std::cout << "\n    FATAL: 'maxMemD' cannot be empty.";
+                            killedProccessesPatch = sType;
                         }
                         break;
                     }
@@ -131,13 +158,19 @@ int main() {
             }
         }
     }
-    if (maxMemDBool == 0) {
-        std::cout << "\n    FATAL: Cannot find 'maxMemD' in patch.properties." << std::endl;
+    if (maxMemDBool == 0 || settingsFilenameBool == 0) {
+        if (maxMemDBool == 0) {
+            std::cout << "\n    FATAL: Cannot find 'maxMemD' in 'patch.properties'" << std::endl;
+        }
+        if (settingsFilenameBool == 0) {
+            std::cout << "\n    FATAL: Cannot find 'settingsFilename' in 'patch.properties'" << std::endl;
+        }
         return -1;
     }
     tmp.clear();
     patchFile.clear();
     patchFile.close();
+    settingsFile.open(settingsFilename);
     if (!settingsFile) {
         std::cout << "Warining! Cannot open settings file, starting in default mode..." << std::endl;
         maxMem = maxMemD;
@@ -151,37 +184,27 @@ int main() {
                 }
                 else if (c == '=' && !sType.empty()) {
                     if (sType == "maxMem") {
-                        bool getLong = false;
-                        sType = "";
-                        for (char c2 : tmp) {
-                            if (getLong == true && std::isdigit(c2)) {
-                                sType += c2;
-                            }
-                            if (c2 == '=') {
-                                getLong = true;
-                            }
-                        }
+                        sType = getNext(tmp);
                         if (!sType.empty()) {
                             maxMem = std::__cxx11::stol(sType);
+                            maxMemBool = true;
                         }
                         else
                             maxMem = maxMemD;
                         break;
                     }
                     else if (sType == "ignoreName") {
-                        bool getName = false;
-                        sType = "";
-                        for (char c2 : tmp) {
-                            if (getName == true) {
-                                sType += c2;
-                            }
-                            if (c2 == '=') {
-                                getName = true;
-                            }
-                        }
+                        sType = getNext(tmp);
                         if (!sType.empty()) {
                             ignoringNames.push_back(sType);
-                            std::cout << sType << ignoreStr << std::endl;
+                            std::cout << "From config [" << sType << ignoreStr << ']' << std::endl;
+                        }
+                        break;
+                    }
+                    else if (sType == "sleepTime") {
+                        sType = getNext(tmp);
+                        if (!sType.empty()) {
+                            sleepTime = std::__cxx11::stol(sType);
                         }
                         break;
                     }
@@ -196,10 +219,19 @@ int main() {
     settingsFile.close();
     tmp.clear();
     tmp.shrink_to_fit();
+    if (maxMemBool == 0)
+        maxMem = maxMemD;
     std::cout << "Max. Memory for proccess: " << maxMem << std::endl;
+    sleep(sleepTime);
     while (true) {
+        system("clear");
         checkNum++;
-        std::cout << "\r" << checkerStr << "[" << checkNum << "]" << std::flush;
+        std::cout << checkerStr << "[" << checkNum << "]" << std::endl;
+        std::cout << killedProccessesPatch << "{" << std::endl;
+        for (auto sStr : killedProccesses) {
+          std::cout << sStr << std::endl;
+        }
+        std::cout << '}' << std::endl;
         std::vector<std::tuple<long, long, std::string>> procceses = get_process_memory_usage();
         if (!procceses.empty())
             for (int i = 0; i < procceses.size(); i++) {
@@ -216,13 +248,12 @@ int main() {
                     }
                 }
                 if (((proccesMemNow / 1024)) > maxMem && isSkipPID != true) {
-                    std::cout << std::string(checkerStr.length(), '\b');
-                    checkerStr.clear();
+                    killedProccesses.push_back(" [" + proccesPidNow + "] '" + proccesNameStrNow + "'");
                     if (proccesPidNow == "1") {
-                        std::cout << "Attention! Kernel's memory is within limits! Self-killing..." << std::endl;
+                        std::cout << "\nAttention! Kernel's memory is within limits! Self-killing..." << std::endl;
                         return -1;
                     }
-                    std::cout << "Killing PID " << proccesPidNow << std::endl;
+                    std::cout << "Killing PID " << proccesPidNow << " [" << proccesNameStrNow << ']' << std::endl;
                     system(command.c_str());
                 }
             }
