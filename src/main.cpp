@@ -56,7 +56,7 @@ int main() {
     }
     system("clear");
     long proccesMemNow;
-    long sleepTime = 1;
+    double sleepTime = 1;
     long proccesNameNow;
     std::string proccesNameStrNow;
     std::string proccesPidNow;
@@ -204,7 +204,7 @@ int main() {
                     else if (sType == "sleepTime") {
                         sType = getNext(tmp);
                         if (!sType.empty()) {
-                            sleepTime = std::__cxx11::stol(sType);
+                            sleepTime = std::__cxx11::stod(sType);
                         }
                         break;
                     }
