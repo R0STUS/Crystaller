@@ -50,8 +50,11 @@ std::string getNext(std::string tmp) {
 }
 
 int main() {
+    std::ofstream logsFile;
+    logsFile.open("latest.log");
     if (isRunningAsRoot()) {
         std::cout << "Do NOT run this in root" << std::endl;
+        logsFile << "Do NOT run this in root" << std::endl;
         return 1;
     }
     system("clear");
@@ -81,6 +84,7 @@ int main() {
     patchFile.open("patch.properties");
     if (!patchFile) {
         std::cout << "\n    FATAL: Cannot open patch.properties." << std::endl;
+        logsFile << "\n    FATAL: cannot open patch.properties." << std::endl;
         return -1;
     }
     else {
@@ -122,6 +126,7 @@ int main() {
                         }
                         else {
                             std::cout << "\n    FATAL: 'maxMemD' cannot be empty.";
+                            logsFile << "\n    FATAL: 'maxMemD' cannot be empty.";
                         }
                         break;
                     }
@@ -133,6 +138,7 @@ int main() {
                         }
                         else {
                             std::cout << "\n    FATAL: 'settingsFilename' cannot be empty.";
+                            logsFile << "\n    FATAL: 'settingsFilename' cannot be empty.";
                         }
                         break;
                     }
@@ -161,9 +167,11 @@ int main() {
     if (maxMemDBool == 0 || settingsFilenameBool == 0) {
         if (maxMemDBool == 0) {
             std::cout << "\n    FATAL: Cannot find 'maxMemD' in 'patch.properties'" << std::endl;
+            logsFile << "\n    FATAL: Cannot find 'maxMemD' in 'patch.properties'" << std::endl;
         }
         if (settingsFilenameBool == 0) {
             std::cout << "\n    FATAL: Cannot find 'settingsFilename' in 'patch.properties'" << std::endl;
+            logsFile << "\n    FATAL: Cannot find 'settingsFilename' in 'patch.properties'" << std::endl;
         }
         return -1;
     }
@@ -173,6 +181,7 @@ int main() {
     settingsFile.open(settingsFilename);
     if (!settingsFile) {
         std::cout << "Warining! Cannot open settings file, starting in default mode..." << std::endl;
+        logsFile << "Warning! Cannot open settings file, starting in default mode..." << std::endl;
         maxMem = maxMemD;
     }
     else {
@@ -222,16 +231,23 @@ int main() {
     if (maxMemBool == 0)
         maxMem = maxMemD;
     std::cout << "Max. Memory for proccess: " << maxMem << std::endl;
+    logsFile << "Max. Memory for proccess: " << maxMem << std::endl;
     sleep(sleepTime);
+    logsFile.close();
     while (true) {
+        logsFile.open("latest.log");
         system("clear");
         checkNum++;
         std::cout << checkerStr << "[" << checkNum << "]" << std::endl;
+        logsFile << checkerStr << "[" << checkNum << "]" << std::endl;
         std::cout << killedProccessesPatch << "{" << std::endl;
+        logsFile << killedProccessesPatch << "{" << std::endl;
         for (auto sStr : killedProccesses) {
           std::cout << sStr << std::endl;
+          logsFile << sStr << std::endl;
         }
         std::cout << '}' << std::endl;
+        logsFile << '}' << std::endl;
         std::vector<std::tuple<long, long, std::string>> procceses = get_process_memory_usage();
         if (!procceses.empty())
             for (int i = 0; i < procceses.size(); i++) {
@@ -251,12 +267,14 @@ int main() {
                     killedProccesses.push_back(" [" + proccesPidNow + "] '" + proccesNameStrNow + "'");
                     if (proccesPidNow == "1") {
                         std::cout << "\nAttention! Kernel's memory is within limits! Self-killing..." << std::endl;
+                        logsFile << "\nKERNEL" << std::endl;
                         return -1;
                     }
                     std::cout << "Killing PID " << proccesPidNow << " [" << proccesNameStrNow << ']' << std::endl;
                     system(command.c_str());
                 }
             }
+        logsFile.close();
         sleep(1);
     }
 }

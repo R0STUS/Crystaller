@@ -33,3 +33,6 @@
 
 # Config
 settings.properties
+
+# Cache
+*.log
