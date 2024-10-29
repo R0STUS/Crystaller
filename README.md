@@ -1,4 +1,4 @@
-Create and Edit the 'settings.properties' to change Max. Memory limit for proccess.
+Create and Edit the 'settings.properties' to configure Crystaller.
 - maxMem - set max memory limit
 ```properties
 maxMem=2048
