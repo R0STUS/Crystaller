@@ -1,3 +1,7 @@
+## Important Disclaimer
+
+Before using the utility, please review the [disclaimer](DISCLAIMER.md).
+
 Create and Edit the 'settings.properties' to configure Crystaller.
 - maxMem - set max memory limit.
 ```properties
