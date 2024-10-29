@@ -229,6 +229,19 @@ int main() {
                         }
                         break;
                     }
+                    else if (sType == "build") {
+                        sType = getNext(tmp);
+                        if (!sType.empty()) {
+                            std::cout << " Build: " << sType << std::endl;
+                            logsFile << " Build: " << sType << std::endl;
+                        }
+                        else {
+                            std::cout << "\n    FATAL: 'build' cannot be empty." << std::endl;
+                            logsFile << "\n    FATAL: 'build' cannot be empty." << std::endl;
+                            return -1;
+                        }
+                        break;
+                    }
                 }
                 else
                     break;
