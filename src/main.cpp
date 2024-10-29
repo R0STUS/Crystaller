@@ -49,6 +49,63 @@ std::string getNext(std::string tmp) {
     return sType;
 }
 
+std::tuple<std::string, char, std::string> getVar(std::string tmp) {
+    bool getName = true;
+    bool getType = false;
+    bool getValue = false;
+    std::string name;
+    char type;
+    std::string value;
+    std::string sType = "";
+    for (char c2 : tmp) {
+        if (c2 == ';') {
+            if (getName == true) {
+                name = sType;
+                sType = "";
+                getName = false;
+                getType = true;
+            }
+            else if (getType == true) {
+                for (char c : sType) {
+                    type = c;
+                    break;
+                }
+                sType = "";
+                getType = false;
+                getValue = true;
+            }
+            else if (getValue == true) {
+                value = sType;
+                sType = "";
+                getValue = false;
+            }
+        }
+        if (getName == true) {
+            sType += c2;
+        }
+        else if (getType == true) {
+            sType += c2;
+        }
+        else if (getValue == true) {
+            sType += c2;
+        }
+    }
+    return {name, type, value};
+}
+
+struct varBool {
+  std::string name;
+  bool value;
+};
+struct varLong {
+  std::string name;
+  long value;
+};
+struct varStr {
+  std::string name;
+  std::string value;
+};
+
 int main() {
     std::ofstream logsFile;
     logsFile.open("latest.log");
@@ -81,6 +138,9 @@ int main() {
     bool maxMemDBool = false;
     std::string settingsFilename;
     bool settingsFilenameBool = false;
+    std::vector<varStr> strings;
+    std::vector<varLong> longs;
+    std::vector<varBool> bools;
     patchFile.open("patch.properties");
     if (!patchFile) {
         std::cout << "\n    FATAL: Cannot open patch.properties." << std::endl;
@@ -143,18 +203,29 @@ int main() {
                         break;
                     }
                     else if (sType == "killedProccessesPatch") {
-                        bool getStr = false;
-                        sType = "";
-                        for (char c2 : tmp) {
-                            if (getStr == true) {
-                                sType += c2;
-                            }
-                            if (c2 == '=') {
-                                getStr = true;
-                            }
-                        }
+                        sType = getNext(tmp);
                         if (!sType.empty()) {
                             killedProccessesPatch = sType;
+                        }
+                        break;
+                    }
+                    else if (sType == "var") {
+                        sType = getNext(tmp);
+                        if (!sType.empty()) {
+                            std::tuple<std::string, char, std::string> temp = getVar(sType);
+                            std::cout << "From patch [Loading " << std::get<0>(temp) << "...]" << std::endl;
+                            logsFile << "From patch [Loading " << std::get<0>(temp) << "...]" << std::endl;
+                            if (std::get<1>(temp) == 'l') {
+                              longs.push_back({std::get<0>(temp), std::__cxx11::stol(std::get<2>(temp))});
+                            }
+                            else if (std::get<1>(temp) == 's') {
+                              strings.push_back({std::get<0>(temp), std::get<2>(temp)});
+                            }
+                            else if (std::get<1>(temp) == 'b') {
+                              bool booled;
+                              std::istringstream(std::get<2>(temp)) >> booled;
+                              bools.push_back({std::get<0>(temp), booled});
+                            }
                         }
                         break;
                     }
