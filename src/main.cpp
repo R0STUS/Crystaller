@@ -242,6 +242,19 @@ int main() {
                         }
                         break;
                     }
+                    else if (sType == "patch") {
+                        sType = getNext(tmp);
+                        if (!sType.empty()) {
+                            std::cout << " Patch: " << sType << std::endl;
+                            logsFile << " Patch: " << sType << std::endl;
+                        }
+                        else {
+                            std::cout << "\n    FATAL: 'patch' cannot be empty." << std::endl;
+                            logsFile << "\n    FATAL: 'patch' cannot be empty." << std::endl;
+                            return -1;
+                        }
+                        break;
+                    }
                 }
                 else
                     break;
