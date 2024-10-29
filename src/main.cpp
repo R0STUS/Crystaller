@@ -116,13 +116,14 @@ int main() {
     }
     system("clear");
     // BUILD VERSION
-    std::string build = "$1.patch-support";
+    std::string build = "$2.patch-support";
     // $ = Preview; # = Release;
     // after '.' this is the name of the branch
     std::cout << " BUILD: " << build << std::endl;
     logsFile << " BUILD: " << build << std::endl;
     long proccesMemNow;
     double sleepTime = 1;
+    double sleepBeforeTime = 1;
     long proccesNameNow;
     std::string proccesNameStrNow;
     std::string proccesPidNow;
@@ -308,10 +309,18 @@ int main() {
                         }
                         break;
                     }
+                    else if (sType == "sleepBeforeTime") {
+                        sType = getNext(tmp);
+                        if (!sType.empty()) {
+                            sleepBeforeTime = std::__cxx11::stof(sType);
+                        }
+                        break;
+                    }
                     else if (sType == "sleepTime") {
                         sType = getNext(tmp);
                         if (!sType.empty()) {
-                            sleepTime = std::__cxx11::stod(sType);
+                            sleepTime = std::__cxx11::stof(sType);
+                            std::cout << sleepTime << std::endl;
                         }
                         break;
                     }
@@ -330,7 +339,7 @@ int main() {
         maxMem = maxMemD;
     std::cout << "Max. Memory for proccess: " << maxMem << std::endl;
     logsFile << "Max. Memory for proccess: " << maxMem << std::endl;
-    sleep(sleepTime);
+    usleep(static_cast<int>(sleepBeforeTime * 1000000));
     logsFile.close();
     while (true) {
         logsFile.open("latest.log");
@@ -377,6 +386,6 @@ int main() {
                 }
             }
         logsFile.close();
-        sleep(1);
+        usleep(static_cast<int>(sleepTime * 1000000));
     }
 }
