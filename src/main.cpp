@@ -115,6 +115,12 @@ int main() {
         return 1;
     }
     system("clear");
+    // BUILD VERSION
+    std::string build = "$1.patch-support";
+    // $ = Preview; # = Release;
+    // after '.' this is the name of the branch
+    std::cout << " BUILD: " << build << std::endl;
+    logsFile << " BUILD: " << build << std::endl;
     long proccesMemNow;
     double sleepTime = 1;
     long proccesNameNow;
@@ -138,6 +144,8 @@ int main() {
     bool maxMemDBool = false;
     std::string settingsFilename;
     bool settingsFilenameBool = false;
+    std::string patch;
+    bool patchBool;
     std::vector<varStr> strings;
     std::vector<varLong> longs;
     std::vector<varBool> bools;
@@ -229,24 +237,13 @@ int main() {
                         }
                         break;
                     }
-                    else if (sType == "build") {
-                        sType = getNext(tmp);
-                        if (!sType.empty()) {
-                            std::cout << " Build: " << sType << std::endl;
-                            logsFile << " Build: " << sType << std::endl;
-                        }
-                        else {
-                            std::cout << "\n    FATAL: 'build' cannot be empty." << std::endl;
-                            logsFile << "\n    FATAL: 'build' cannot be empty." << std::endl;
-                            return -1;
-                        }
-                        break;
-                    }
                     else if (sType == "patch") {
                         sType = getNext(tmp);
                         if (!sType.empty()) {
                             std::cout << " Patch: " << sType << std::endl;
                             logsFile << " Patch: " << sType << std::endl;
+                            patch = sType;
+                            patchBool = true;
                         }
                         else {
                             std::cout << "\n    FATAL: 'patch' cannot be empty." << std::endl;
@@ -261,7 +258,7 @@ int main() {
             }
         }
     }
-    if (maxMemDBool == 0 || settingsFilenameBool == 0) {
+    if (maxMemDBool == 0 || settingsFilenameBool == 0 || patchBool == 0) {
         if (maxMemDBool == 0) {
             std::cout << "\n    FATAL: Cannot find 'maxMemD' in 'patch.properties'" << std::endl;
             logsFile << "\n    FATAL: Cannot find 'maxMemD' in 'patch.properties'" << std::endl;
@@ -269,6 +266,10 @@ int main() {
         if (settingsFilenameBool == 0) {
             std::cout << "\n    FATAL: Cannot find 'settingsFilename' in 'patch.properties'" << std::endl;
             logsFile << "\n    FATAL: Cannot find 'settingsFilename' in 'patch.properties'" << std::endl;
+        }
+        if (patchBool == 0) {
+            std::cout << "\n    FATAL: Cannot find 'patch' in 'patch.properties'" << std::endl;
+            logsFile << "\n    FATAL: Cannot find 'patch' in 'patch.properties'" << std::endl;
         }
         return -1;
     }
@@ -334,6 +335,10 @@ int main() {
     while (true) {
         logsFile.open("latest.log");
         system("clear");
+        std::cout << " BUILD: " << build << std::endl;
+        logsFile << " BUILD: " << build << std::endl;
+        std::cout << " Patch: " << patch << std::endl;
+        logsFile << " Patch: " << patch << std::endl;
         checkNum++;
         std::cout << checkerStr << "[" << checkNum << "]" << std::endl;
         logsFile << checkerStr << "[" << checkNum << "]" << std::endl;
