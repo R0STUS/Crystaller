@@ -8,17 +8,17 @@ Create and Edit the 'settings.properties' to configure Crystaller.
 maxMem=2048
 ```
 
-- ignoreName - set app that will be ignored by Crystaller.
+- ignoreName - set app that will be ignored by Crystaller. (Up to 15 symbols. An a 'ps' command can't get full proccess name)
 ```properties
 ignoreName=vesktop
-ignoreName=telegram-desktop
+ignoreName=telegram-deskto
 ignoreName=chrome
 ```
 
-- ignoreNameCPU - set app that will be ignored by Crystaller's CPU checker.
+- ignoreNameCPU - set app that will be ignored by Crystaller's CPU checker. (Up to 15 symbols. An a 'ps' command can't get full proccess name)
 ```properties
 ignoreNameCPU=github-desktop
-ignoreNameCPU=telegram-desktop
+ignoreNameCPU=telegram-deskto
 ignoreNameCPU=chrome
 ```
 
