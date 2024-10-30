@@ -126,7 +126,7 @@ int main() {
     }
     system("clear");
     // BUILD VERSION
-    std::string build = "$9.patch-support";
+    std::string build = "$10.patch-support";
     // $ = Preview; # = Release;
     // after '.' this is the name of the branch
     std::cout << " BUILD: " << build << std::endl;
@@ -159,7 +159,8 @@ int main() {
     std::ifstream settingsFile;
     std::ifstream patchFile;
     std::string sType;
-    std::vector<std::string> ignoringNames = {"ps", "crystaller", "sway", "hypr", "hypridle", "sleep", "dbus-broker-lau", "swaync-client", "playerctld", "login", "bluetoothd", "cpuUsage.sh", "Hyprland", "kernel", "waybar", "electron", "Xwayland", "wayland", "Xorg", "pypr", "pipewire", "init", "systemd", "udevd", "dbus-daemon", "dbus-broker", "gnome-shell", "kdeinit5", "lightdm", "sddm", "xmonad", "compiz", "xfwm4", "kwin_x11", "metacity", "openbox", "cinnamon-sess", "mutter", "lxsession", "xfce4-session", "pulseaudio", "gdm", "slack", "nautilus", "thunar", "dconf-service", "gsettings", "pidgin", "ssh-agent", "gnome-settings-daemon", "xfsettingsd", "nm-applet", "blueman-applet", "clipman", "lxpolkit", "xfce4-panel", "mate-settings-daemon", "mate-panel", "polkitd", "rsyslogd", "cron", "atd", "systemd-journald", "systemd-logind", "systemd-udevd", "rtkit-daemon", "colord", "cupsd", "lightdm-gtk-greeter", "xset", "xmodmap", "firewalld", "NetworkManager", "ntpd", "systemd-timesyncd", "acpid", "apt-daily-service", "snapd", "gimmik", "gnome-terminal-server", "kbd", "Xvnc", "vmtoolsd", "vmware-tools", "udisksd", "gnome-keyring-daemon", "docker", "httpd", "mysqld", "postgres", "ssh", "rsync", "mdadm", "fsck", "mount", "umount", "mnt", "parted", "fstab", "plymouth", "pstree", "kmod", "journalctl", "syslog-ng", "networkd-dispatcher", "anacron", "logrotate", "user@1000.service", "agetty", "plymouth-start", "systemd-sysctl", "systemd-suspend", "systemd-hibernate"};
+    std::vector<std::string> ignoringNames = {"ps", "wl-paste", "wl-copy", "chrome_crashpad", "crystaller", "sway", "hypr", "hypridle", "sleep", "dbus-broker-lau", "swaync-client", "playerctld", "login", "bluetoothd", "cpuUsage.sh", "Hyprland", "kernel", "waybar", "electron", "Xwayland", "wayland", "Xorg", "pypr", "pipewire", "init", "systemd", "udevd", "dbus-daemon", "dbus-broker", "gnome-shell", "kdeinit5", "lightdm", "sddm", "xmonad", "compiz", "xfwm4", "kwin_x11", "metacity", "openbox", "cinnamon-sess", "mutter", "lxsession", "xfce4-session", "pulseaudio", "gdm", "slack", "nautilus", "thunar", "dconf-service", "gsettings", "pidgin", "ssh-agent", "gnome-settings-daemon", "xfsettingsd", "nm-applet", "blueman-applet", "clipman", "lxpolkit", "xfce4-panel", "mate-settings-daemon", "mate-panel", "polkitd", "rsyslogd", "cron", "atd", "systemd-journald", "systemd-logind", "systemd-udevd", "rtkit-daemon", "colord", "cupsd", "lightdm-gtk-greeter", "xset", "xmodmap", "firewalld", "NetworkManager", "ntpd", "systemd-timesyncd", "acpid", "apt-daily-service", "snapd", "gimmik", "gnome-terminal-server", "kbd", "Xvnc", "vmtoolsd", "vmware-tools", "udisksd", "gnome-keyring-daemon", "docker", "httpd", "mysqld", "postgres", "ssh", "rsync", "mdadm", "fsck", "mount", "umount", "mnt", "parted", "fstab", "plymouth", "pstree", "kmod", "journalctl", "syslog-ng", "networkd-dispatcher", "anacron", "logrotate", "user@1000.service", "agetty", "plymouth-start", "systemd-sysctl", "systemd-suspend", "systemd-hibernate"};
+    std::vector<std::string> ignoringNamesCPU;
     std::vector<std::string> killedProccesses;
     bool isSkipPID;
     std::string checkerStr = "";
@@ -366,6 +367,14 @@ int main() {
                         if (!sType.empty()) {
                             ignoringNames.push_back(sType);
                             std::cout << "From config [" << sType << ignoreStr << ']' << std::endl;
+                        }
+                        break;
+                    }
+                    else if (sType == "ignoreNameCPU") {
+                        sType = getNext(tmp);
+                        if (!sType.empty()) {
+                            ignoringNamesCPU.push_back(sType);
+                            std::cout << "From config [" << sType << ignoreStr << " {CPU} " << ']' << std::endl;
                         }
                         break;
                     }
