@@ -36,3 +36,8 @@ sleepTime=0.5
 ```properties
 cpuon=false
 ```
+
+- maxCPUusage - set max CPU usage limit (%).
+```properties
+maxCPUusage=75
+```
