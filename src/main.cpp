@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <fstream>
 #include <tuple>
+#include <cstdio>
+#include <dirent.h>
 
 bool isRunningAsRoot() {
     return getuid() == 0;
@@ -14,12 +16,12 @@ bool isRunningAsRoot() {
 
 std::vector<std::tuple<long, long, float, std::string, std::string>> get_process_memory_usage() {
     std::vector<std::tuple<long, long, float, std::string, std::string>> result;
-    FILE* fp = popen("ps -e --no-headers -o pid,rss,pcpu,comm,user", "r");
+    FILE* fp = popen("ps -e --no-headers -o pid,rss,pcpu,comm:32,user", "r");
     if (fp == nullptr) {
         std::cerr << "Failed to open channel!" << std::endl;
         return result;
     }
-    char buffer[256];
+    char buffer[512];
     while (fgets(buffer, sizeof(buffer), fp) != nullptr) {
         std::istringstream iss(buffer);
         long pid, rss;
@@ -126,7 +128,7 @@ int main() {
     }
     system("clear");
     // BUILD VERSION
-    std::string build = "$10.patch-support";
+    std::string build = "$11.patch-support";
     // $ = Preview; # = Release;
     // after '.' this is the name of the branch
     std::cout << " BUILD: " << build << std::endl;
