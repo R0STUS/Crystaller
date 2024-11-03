@@ -128,15 +128,12 @@ int main() {
     }
     system("clear");
     // BUILD VERSION
-    std::string build = "$13.patch-support";
+    std::string build = "$14.patch-support";
     // $ = Preview; # = Release;
     // after '.' this is the name of the branch
     std::cout << " BUILD: " << build << std::endl;
     logsFile << " BUILD: " << build << std::endl;
     long cores = getCores();
-    if (cores == -1) {
-        return -1;
-    }
     std::cout << " Total Proc. Cores: [" << cores << ']' << std::endl;
     logsFile << " Total Proc. Cores: [" << cores << ']' << std::endl;
     long proccesMemNow;
@@ -430,6 +427,9 @@ int main() {
     logsFile << "Max. Memory for proccess: " << maxMem << std::endl;
     std::cout << "Max. CPU usage for proccess: " << maxCPUusage << " [CPU check = " << cpuon << "] " << std::endl;
     logsFile << "Max. CPU usage for proccess: " << maxCPUusage << " [CPU check = " << cpuon << "] " << std::endl;
+    if (cores == -1 && cpuon) {
+        return -1;
+    }
     usleep(static_cast<int>(sleepBeforeTime * 1000000));
     logsFile.close();
     while (true) {
