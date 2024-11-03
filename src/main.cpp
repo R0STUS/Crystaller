@@ -14,9 +14,9 @@ bool isRunningAsRoot() {
     return getuid() == 0;
 }
 
-std::vector<std::tuple<long, long, float, std::string, std::string>> get_process_memory_usage() {
+std::vector<std::tuple<long, long, float, std::string, std::string>> get_process_memory_usage(std::string patchCommandChecker) {
     std::vector<std::tuple<long, long, float, std::string, std::string>> result;
-    FILE* fp = popen("ps -e --no-headers -o pid,rss,pcpu,comm:32,user", "r");
+    FILE* fp = popen(patchCommandChecker.c_str(), "r");
     if (fp == nullptr) {
         std::cerr << "Failed to open channel!" << std::endl;
         return result;
@@ -128,7 +128,7 @@ int main() {
     }
     system("clear");
     // BUILD VERSION
-    std::string build = "$12.patch-support";
+    std::string build = "$13.patch-support";
     // $ = Preview; # = Release;
     // after '.' this is the name of the branch
     std::cout << " BUILD: " << build << std::endl;
@@ -142,6 +142,8 @@ int main() {
     long proccesMemNow;
     double sleepTime = 1;
     double sleepBeforeTime = 1;
+    std::string patchCommandChecker;
+    bool patchCommandCheckerBool = false;
     long proccesNameNow;
     float maxCPUusageD;
     bool maxCPUusageDbool;
@@ -253,6 +255,18 @@ int main() {
                         }
                         break;
                     }
+                    else if (sType == "patchCommandChecker") {
+                        sType = getNext(tmp);
+                        if (!sType.empty()) {
+                            settingsFilename = sType;
+                            patchCommandCheckerBool = true;
+                        }
+                        else {
+                            std::cout << "\n    FATAL: 'patchCommandChecker' cannot be empty.";
+                            logsFile << "\n    FATAL: 'patchCommandChecker' cannot be empty.";
+                        }
+                        break;
+                    }
                     else if (sType == "killedProccessesPatch") {
                         sType = getNext(tmp);
                         if (!sType.empty()) {
@@ -301,7 +315,7 @@ int main() {
             }
         }
     }
-    if (maxMemDBool == 0 || settingsFilenameBool == 0 || patchBool == 0 || maxCPUusageDbool == 0) {
+    if (maxMemDBool == 0 || settingsFilenameBool == 0 || patchBool == 0 || maxCPUusageDbool == 0 || patchCommandCheckerBool == 0) {
         if (maxMemDBool == 0) {
             std::cout << "\n    FATAL: Cannot find 'maxMemD' in 'patch.properties'" << std::endl;
             logsFile << "\n    FATAL: Cannot find 'maxMemD' in 'patch.properties'" << std::endl;
@@ -317,6 +331,10 @@ int main() {
         if (maxCPUusageDbool == 0) {
             std::cout << "\n    FATAL: Cannot find 'maxCPUusageD' in 'patch.properties'" << std::endl;
             logsFile << "\n    FATAL: Cannot find 'maxCPUusageD' in 'patch.properties'" << std::endl;
+        }
+        if (patchCommandCheckerBool == 0) {
+            std::cout << "\n    FATAL: Cannot find 'patchCommandChecker' in 'patch.properties'" << std::endl;
+            logsFile << "\n    FATAL: Cannot find 'patchCommandChecker' in 'patch.properties'" << std::endl;
         }
         return -1;
     }
@@ -432,7 +450,7 @@ int main() {
         }
         std::cout << '}' << std::endl;
         logsFile << '}' << std::endl;
-        std::vector<std::tuple<long, long, float, std::string, std::string>> procceses = get_process_memory_usage();
+        std::vector<std::tuple<long, long, float, std::string, std::string>> procceses = get_process_memory_usage(patchCommandChecker);
         if (!procceses.empty())
             for (int i = 0; i < procceses.size(); i++) {
                 isSkipPID = false;
