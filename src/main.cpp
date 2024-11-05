@@ -379,8 +379,6 @@ int main() {
                 else if (c == '=' && !sType.empty()) {
                     if (sType == "maxMem") {
                         sType = getNext(tmp);
-                        if (!sType.empty()) {
-                        sType = getAfterLine(tmp);
                         if (!sType.empty() && isDigital(sType)) {
                             maxMem = std::__cxx11::stol(sType);
                             maxMemBool = true;
@@ -408,10 +406,6 @@ int main() {
                     }
                     else if (sType == "ignoreName") {
                         sType = getNext(tmp);
-=======
-                    if (sType == "ignoreName") {
-                        sType = getAfterLine(tmp);
->>>>>>> main
                         if (!sType.empty()) {
                             ignoringNames.push_back(sType);
                             std::cout << "From config [" << sType << ignoreStr << ']' << std::endl;
