@@ -143,7 +143,7 @@ int main() {
     }
     system("clear");
     // BUILD VERSION
-    std::string build = "$18.patch-support";
+    std::string build = "#1.main";
     // $ = Preview; # = Release;
     // after '.' this is the name of the branch
     std::cout << " BUILD: " << build << std::endl;
