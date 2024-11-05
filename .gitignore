@@ -32,7 +32,6 @@
 *.app
 
 # Config
-*.properties
 settings.properties
 
 # Cache
