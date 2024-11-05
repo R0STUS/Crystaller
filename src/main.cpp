@@ -134,7 +134,7 @@ int main() {
     }
     system("clear");
     // BUILD VERSION
-    std::string build = "$17.patch-support";
+    std::string build = "$18.patch-support";
     // $ = Preview; # = Release;
     // after '.' this is the name of the branch
     std::cout << " BUILD: " << build << std::endl;
@@ -280,8 +280,8 @@ int main() {
                         sType = getNext(tmp);
                         if (!sType.empty()) {
                             std::tuple<std::string, char, std::string> temp = getVar(sType);
-                            std::cout << "From patch [Loading " << std::get<0>(temp) << "...]" << std::endl;
-                            logsFile << "From patch [Loading " << std::get<0>(temp) << "...]" << std::endl;
+                            std::cout << "From patch [Loading '" << std::get<0>(temp) << "'...]" << std::endl;
+                            logsFile << "From patch [Loading '" << std::get<0>(temp) << "'...]" << std::endl;
                             if (std::get<1>(temp) == 'l') {
                               longs.push_back({std::get<0>(temp), std::__cxx11::stol(std::get<2>(temp))});
                             }
@@ -516,7 +516,7 @@ int main() {
                     typeOfBad++;
                 }
                 if (!isfound) {
-                    suspids.push_back({proccesNameNow, 0, 5 / sleepTime});
+                    suspids.push_back({proccesNameNow, 0, (long)(5.0 / sleepTime)});
                 }
                 if (isfound && isdelete) {
                     suspids.erase(std::remove_if(suspids.begin(), suspids.end(), [&proccesNameNow](const suspid& o) { return o.pid == proccesNameNow; }), suspids.end());
