@@ -34,3 +34,6 @@
 # Config
 *.properties
 settings.properties
+
+# Cache
+*.log
