@@ -38,7 +38,6 @@ std::vector<std::tuple<long, long, float, std::string, std::string>> get_process
     return result;
 }
 
-<<<<<<< HEAD
 long getCores() {
     long nprocs = sysconf(_SC_NPROCESSORS_ONLN);
     if (nprocs < 1) {
@@ -124,20 +123,7 @@ struct suspid {
     long counter;
     long total;
 };
-=======
-std::string getAfterLine(std::string line) {
-    bool getName = false;
-    std::string str = "";
-    for (char c : line) {
-        if (getName == true) {
-            str += c;
-        }
-        if (c == '=') {
-            getName = true;
-        }
-    }
-    return str;
-}
+
 bool isDigital(std::string str) {
     for (char c : str) {
         if (!std::isdigit(c)) {
@@ -146,7 +132,6 @@ bool isDigital(std::string str) {
     }
     return true;
 }
->>>>>>> main
 
 int main() {
     std::ofstream logsFile;
@@ -393,13 +378,10 @@ int main() {
                 }
                 else if (c == '=' && !sType.empty()) {
                     if (sType == "maxMem") {
-<<<<<<< HEAD
                         sType = getNext(tmp);
                         if (!sType.empty()) {
-=======
                         sType = getAfterLine(tmp);
                         if (!sType.empty() && isDigital(sType)) {
->>>>>>> main
                             maxMem = std::__cxx11::stol(sType);
                             maxMemBool = true;
                         }
@@ -407,7 +389,6 @@ int main() {
                             maxMem = maxMemD;
                         break;
                     }
-<<<<<<< HEAD
                     else if (sType == "maxCPUusage") {
                         sType = getNext(tmp);
                         if (!sType.empty()) {
