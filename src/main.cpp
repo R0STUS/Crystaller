@@ -118,6 +118,12 @@ struct varStr {
   std::string value;
 };
 
+struct suspid {
+    long pid;
+    long counter;
+    long total;
+};
+
 int main() {
     std::ofstream logsFile;
     logsFile.open("latest.log");
@@ -128,7 +134,7 @@ int main() {
     }
     system("clear");
     // BUILD VERSION
-    std::string build = "$15.patch-support";
+    std::string build = "$17.patch-support";
     // $ = Preview; # = Release;
     // after '.' this is the name of the branch
     std::cout << " BUILD: " << build << std::endl;
@@ -177,9 +183,7 @@ int main() {
     std::vector<varStr> strings;
     std::vector<varLong> longs;
     std::vector<varBool> bools;
-
-    maxCPUusage = maxCPUusageD;
-    
+    std::vector<suspid> suspids;
     patchFile.open("patch.properties");
     if (!patchFile) {
         std::cout << "\n    FATAL: Cannot open patch.properties." << std::endl;
@@ -307,6 +311,14 @@ int main() {
                         }
                         break;
                     }
+                    else if (sType == "cpuon") {
+                        sType = getNext(tmp);
+                        if (!sType.empty()) {
+                            std::istringstream(sType) >> cpuon;
+                        }
+                        else
+                            break;
+                    }
                 }
                 else
                     break;
@@ -336,6 +348,9 @@ int main() {
         }
         return -1;
     }
+
+    maxCPUusage = maxCPUusageD;
+    
     tmp.clear();
     patchFile.clear();
     patchFile.close();
@@ -433,6 +448,9 @@ int main() {
     }
     usleep(static_cast<int>(sleepBeforeTime * 1000000));
     logsFile.close();
+    if (sleepTime <= 0) {
+        sleepTime = 0.01;
+    }
     while (true) {
         logsFile.open("latest.log");
         system("clear");
@@ -478,8 +496,30 @@ int main() {
                 if ((proccesMemNow / 1024) > maxMem) {
                     typeOfBad = 2;
                 }
-                if (proccesCPUNow > (maxCPUusage * cores) && cpuon == true && !isSkipPIDCPU) {
+                bool isbad = false;
+                bool isfound = false;
+                bool isdelete = false;
+                for (auto nStr : suspids) {
+                    isfound = true;
+                    if (proccesCPUNow > (maxCPUusage * cores) && cpuon == true && !isSkipPIDCPU) {
+                        if (proccesNameNow == nStr.pid && nStr.counter > nStr.total) {
+                            isbad = true;
+                        }
+                        else if (proccesNameNow == nStr.pid) {
+                            nStr.counter++;
+                        }
+                    }
+                    else
+                        isdelete = true;
+                }
+                if (isbad) {
                     typeOfBad++;
+                }
+                if (!isfound) {
+                    suspids.push_back({proccesNameNow, 0, 5 / sleepTime});
+                }
+                if (isfound && isdelete) {
+                    suspids.erase(std::remove_if(suspids.begin(), suspids.end(), [&proccesNameNow](const suspid& o) { return o.pid == proccesNameNow; }), suspids.end());
                 }
                 switch (typeOfBad) {
                     case 1:
