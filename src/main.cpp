@@ -9,6 +9,7 @@
 #include <tuple>
 #include <cstdio>
 #include <dirent.h>
+#include <thread>
 
 bool isRunningAsRoot() {
     return getuid() == 0;
@@ -133,6 +134,20 @@ bool isDigital(std::string str) {
     return true;
 }
 
+void doNotRunInRoot() {
+    std::ofstream logsFile;
+    logsFile.open("latest.log");
+    while (true) {
+        sleep(1);
+        if (isRunningAsRoot()) {
+            std::cout << "Do NOT run this in root" << std::endl;
+            logsFile << "Do NOT run this in root" << std::endl;
+            exit(1);
+        }
+    }
+    logsFile.close();
+}
+
 int main() {
     std::ofstream logsFile;
     logsFile.open("latest.log");
@@ -141,11 +156,12 @@ int main() {
         logsFile << "Do NOT run this in root" << std::endl;
         return 1;
     }
+    std::thread doNotRunInRootPls(doNotRunInRoot);
     system("clear");
     // BUILD VERSION
-    std::string build = "#1.main";
+    std::string build = "#2.main";
     // $ = Preview; # = Release;
-    // after '.' this is the name of the branch
+    // after '.' is the name of the branch
     std::cout << " BUILD: " << build << std::endl;
     logsFile << " BUILD: " << build << std::endl;
     long cores = getCores();
@@ -176,7 +192,7 @@ int main() {
     std::ifstream patchFile;
     std::string sType;
     std::vector<std::string> ignoringNames;
-    std::vector<std::string> ignoringNamesCPU = {"ps", "wl-paste", "wl-copy", "chrome_crashpad", "crystaller", "sway", "hypr", "hypridle", "sleep", "dbus-broker-lau", "swaync-client", "playerctld", "login", "bluetoothd", "cpuUsage.sh", "Hyprland", "kernel", "waybar", "electron", "Xwayland", "wayland", "Xorg", "pypr", "pipewire", "init", "systemd", "udevd", "dbus-daemon", "dbus-broker", "gnome-shell", "kdeinit5", "lightdm", "sddm", "xmonad", "compiz", "xfwm4", "kwin_x11", "metacity", "openbox", "cinnamon-sess", "mutter", "lxsession", "xfce4-session", "pulseaudio", "gdm", "slack", "nautilus", "thunar", "dconf-service", "gsettings", "pidgin", "ssh-agent", "gnome-settings-daemon", "xfsettingsd", "nm-applet", "blueman-applet", "clipman", "lxpolkit", "xfce4-panel", "mate-settings-daemon", "mate-panel", "polkitd", "rsyslogd", "cron", "atd", "systemd-journald", "systemd-logind", "systemd-udevd", "rtkit-daemon", "colord", "cupsd", "lightdm-gtk-greeter", "xset", "xmodmap", "firewalld", "NetworkManager", "ntpd", "systemd-timesyncd", "acpid", "apt-daily-service", "snapd", "gimmik", "gnome-terminal-server", "kbd", "Xvnc", "vmtoolsd", "vmware-tools", "udisksd", "gnome-keyring-daemon", "docker", "httpd", "mysqld", "postgres", "ssh", "rsync", "mdadm", "fsck", "mount", "umount", "mnt", "parted", "fstab", "plymouth", "pstree", "kmod", "journalctl", "syslog-ng", "networkd-dispatcher", "anacron", "logrotate", "user@1000.service", "agetty", "plymouth-start", "systemd-sysctl", "systemd-suspend", "systemd-hibernate"};
+    std::vector<std::string> ignoringNamesCPU = {"ps", "wl-paste", "wl-copy", "chrome_crashpad", "sway", "hypr", "hypridle", "sleep", "dbus-broker-lau", "swaync-client", "playerctld", "login", "bluetoothd", "cpuUsage.sh", "Hyprland", "kernel", "waybar", "electron", "Xwayland", "wayland", "Xorg", "pypr", "pipewire", "init", "systemd", "udevd", "dbus-daemon", "dbus-broker", "gnome-shell", "kdeinit5", "lightdm", "sddm", "xmonad", "compiz", "xfwm4", "kwin_x11", "metacity", "openbox", "cinnamon-sess", "mutter", "lxsession", "xfce4-session", "pulseaudio", "gdm", "slack", "nautilus", "thunar", "dconf-service", "gsettings", "pidgin", "ssh-agent", "gnome-settings-daemon", "xfsettingsd", "nm-applet", "blueman-applet", "clipman", "lxpolkit", "xfce4-panel", "mate-settings-daemon", "mate-panel", "polkitd", "rsyslogd", "cron", "atd", "systemd-journald", "systemd-logind", "systemd-udevd", "rtkit-daemon", "colord", "cupsd", "lightdm-gtk-greeter", "xset", "xmodmap", "firewalld", "NetworkManager", "ntpd", "systemd-timesyncd", "acpid", "apt-daily-service", "snapd", "gimmik", "gnome-terminal-server", "kbd", "Xvnc", "vmtoolsd", "vmware-tools", "udisksd", "gnome-keyring-daemon", "docker", "httpd", "mysqld", "postgres", "ssh", "rsync", "mdadm", "fsck", "mount", "umount", "mnt", "parted", "fstab", "plymouth", "pstree", "kmod", "journalctl", "syslog-ng", "networkd-dispatcher", "anacron", "logrotate", "user@1000.service", "agetty", "plymouth-start", "systemd-sysctl", "systemd-suspend", "systemd-hibernate"};
     std::vector<std::string> killedProccesses;
     bool isSkipPID;
     bool isSkipPIDCPU;
