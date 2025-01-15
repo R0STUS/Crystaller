@@ -3,7 +3,9 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <unistd.h>
 #include <fstream>
 #include <tuple>
@@ -13,6 +15,22 @@
 
 bool isRunningAsRoot() {
     return getuid() == 0;
+}
+
+const int BUFF_MAX_SIZE = 1024;
+std::string logsStr = "";
+
+void saveLogs() {
+    std::ofstream file("latest.log");
+    file << logsStr;
+    logsStr = "";
+    printf("Logs saved and logs buffer reset.\n");
+}
+
+void handle_sigint(int sig) {
+    printf("\nSIGINT received! Saving logs...\n");
+    saveLogs();
+    exit(-1);
 }
 
 std::vector<std::tuple<long, long, float, std::string, std::string>> get_process_memory_usage(std::string patchCommandChecker) {
@@ -149,24 +167,23 @@ void doNotRunInRoot() {
 }
 
 int main() {
-    std::ofstream logsFile;
-    logsFile.open("latest.log");
+    signal(SIGINT, handle_sigint);
     if (isRunningAsRoot()) {
         std::cout << "Do NOT run this in root" << std::endl;
-        logsFile << "Do NOT run this in root" << std::endl;
+        logsStr += "Do NOT run this in root\n";
         return 1;
     }
     std::thread doNotRunInRootPls(doNotRunInRoot);
     system("clear");
     // BUILD VERSION
-    std::string build = "#2.main";
+    std::string build = "#3.main";
     // $ = Preview; # = Release;
     // after '.' is the name of the branch
     std::cout << " BUILD: " << build << std::endl;
-    logsFile << " BUILD: " << build << std::endl;
+    logsStr += " BUILD: " + build + "\n";
     long cores = getCores();
     std::cout << " Total Proc. Cores: [" << cores << ']' << std::endl;
-    logsFile << " Total Proc. Cores: [" << cores << ']' << std::endl;
+    logsStr += " Total Proc. Cores: [" + std::to_string(cores) + "]\n";
     long proccesMemNow;
     double sleepTime = 1;
     double sleepBeforeTime = 1;
@@ -212,7 +229,8 @@ int main() {
     patchFile.open("patch.properties");
     if (!patchFile) {
         std::cout << "\n    FATAL: Cannot open patch.properties." << std::endl;
-        logsFile << "\n    FATAL: cannot open patch.properties." << std::endl;
+        logsStr += "\n    FATAL: cannot open patch.properties.\n";
+        saveLogs();
         return -1;
     }
     else {
@@ -254,7 +272,7 @@ int main() {
                         }
                         else {
                             std::cout << "\n    FATAL: 'maxMemD' cannot be empty.";
-                            logsFile << "\n    FATAL: 'maxMemD' cannot be empty.";
+                            logsStr += "\n    FATAL: 'maxMemD' cannot be empty.";
                         }
                         break;
                     }
@@ -266,7 +284,7 @@ int main() {
                         }
                         else {
                             std::cout << "\n    FATAL: 'maxCPUusageD' cannot be empty.";
-                            logsFile << "\n    FATAL: 'maxCPUusageD' cannot be empty.";
+                            logsStr += "\n    FATAL: 'maxCPUusageD' cannot be empty.";
                         }
                         break;
                     }
@@ -278,7 +296,7 @@ int main() {
                         }
                         else {
                             std::cout << "\n    FATAL: 'settingsFilename' cannot be empty.";
-                            logsFile << "\n    FATAL: 'settingsFilename' cannot be empty.";
+                            logsStr += "\n    FATAL: 'settingsFilename' cannot be empty.";
                         }
                         break;
                     }
@@ -290,7 +308,7 @@ int main() {
                         }
                         else {
                             std::cout << "\n    FATAL: 'patchCommandChecker' cannot be empty.";
-                            logsFile << "\n    FATAL: 'patchCommandChecker' cannot be empty.";
+                            logsStr += "\n    FATAL: 'patchCommandChecker' cannot be empty.";
                         }
                         break;
                     }
@@ -306,7 +324,7 @@ int main() {
                         if (!sType.empty()) {
                             std::tuple<std::string, char, std::string> temp = getVar(sType);
                             std::cout << "From patch [Loading '" << std::get<0>(temp) << "'...]" << std::endl;
-                            logsFile << "From patch [Loading '" << std::get<0>(temp) << "'...]" << std::endl;
+                            logsStr += "From patch [Loading '" + std::get<0>(temp) + "'...]\n";
                             if (std::get<1>(temp) == 'l') {
                               longs.push_back({std::get<0>(temp), std::__cxx11::stol(std::get<2>(temp))});
                             }
@@ -325,13 +343,14 @@ int main() {
                         sType = getNext(tmp);
                         if (!sType.empty()) {
                             std::cout << " Patch: " << sType << std::endl;
-                            logsFile << " Patch: " << sType << std::endl;
+                            logsStr += " Patch: " + sType + "\n";
                             patch = sType;
                             patchBool = true;
                         }
                         else {
                             std::cout << "\n    FATAL: 'patch' cannot be empty." << std::endl;
-                            logsFile << "\n    FATAL: 'patch' cannot be empty." << std::endl;
+                            logsStr += "\n    FATAL: 'patch' cannot be empty.\n";
+                            saveLogs();
                             return -1;
                         }
                         break;
@@ -353,24 +372,25 @@ int main() {
     if (maxMemDBool == 0 || settingsFilenameBool == 0 || patchBool == 0 || maxCPUusageDbool == 0 || patchCommandCheckerBool == 0) {
         if (maxMemDBool == 0) {
             std::cout << "\n    FATAL: Cannot find 'maxMemD' in 'patch.properties'" << std::endl;
-            logsFile << "\n    FATAL: Cannot find 'maxMemD' in 'patch.properties'" << std::endl;
+            logsStr += "\n    FATAL: Cannot find 'maxMemD' in 'patch.properties'\n";
         }
         if (settingsFilenameBool == 0) {
             std::cout << "\n    FATAL: Cannot find 'settingsFilename' in 'patch.properties'" << std::endl;
-            logsFile << "\n    FATAL: Cannot find 'settingsFilename' in 'patch.properties'" << std::endl;
+            logsStr += "\n    FATAL: Cannot find 'settingsFilename' in 'patch.properties'\n";
         }
         if (patchBool == 0) {
             std::cout << "\n    FATAL: Cannot find 'patch' in 'patch.properties'" << std::endl;
-            logsFile << "\n    FATAL: Cannot find 'patch' in 'patch.properties'" << std::endl;
+            logsStr += "\n    FATAL: Cannot find 'patch' in 'patch.properties'\n";
         }
         if (maxCPUusageDbool == 0) {
             std::cout << "\n    FATAL: Cannot find 'maxCPUusageD' in 'patch.properties'" << std::endl;
-            logsFile << "\n    FATAL: Cannot find 'maxCPUusageD' in 'patch.properties'" << std::endl;
+            logsStr += "\n    FATAL: Cannot find 'maxCPUusageD' in 'patch.properties'\n";
         }
         if (patchCommandCheckerBool == 0) {
             std::cout << "\n    FATAL: Cannot find 'patchCommandChecker' in 'patch.properties'" << std::endl;
-            logsFile << "\n    FATAL: Cannot find 'patchCommandChecker' in 'patch.properties'" << std::endl;
+            logsStr += "\n    FATAL: Cannot find 'patchCommandChecker' in 'patch.properties'\n";
         }
+        saveLogs();
         return -1;
     }
 
@@ -382,7 +402,7 @@ int main() {
     settingsFile.open(settingsFilename);
     if (!settingsFile) {
         std::cout << "Warining! Cannot open settings file, starting in default mode..." << std::endl;
-        logsFile << "Warning! Cannot open settings file, starting in default mode..." << std::endl;
+        logsStr += "Warning! Cannot open settings file, starting in default mode...\n";
         maxMem = maxMemD;
     }
     else {
@@ -425,6 +445,7 @@ int main() {
                         if (!sType.empty()) {
                             ignoringNames.push_back(sType);
                             std::cout << "From config [" << sType << ignoreStr << ']' << std::endl;
+                            logsStr += "From config [" + sType + ignoreStr + "]\n";
                         }
                         break;
                     }
@@ -433,6 +454,7 @@ int main() {
                         if (!sType.empty()) {
                             ignoringNamesCPU.push_back(sType);
                             std::cout << "From config [" << sType << ignoreStr << " {CPU} " << ']' << std::endl;
+                            logsStr += "From config [" + sType + ignoreStr + " {CPU} ]\n";
                         }
                         break;
                     }
@@ -448,6 +470,7 @@ int main() {
                         if (!sType.empty()) {
                             sleepTime = std::__cxx11::stof(sType);
                             std::cout << sleepTime << std::endl;
+                            logsStr += std::to_string(sleepTime) + "\n";
                         }
                         break;
                     }
@@ -465,35 +488,36 @@ int main() {
     if (maxMemBool == 0)
         maxMem = maxMemD;
     std::cout << "Max. Memory for proccess: " << maxMem << std::endl;
-    logsFile << "Max. Memory for proccess: " << maxMem << std::endl;
+    logsStr += "Max. Memory for proccess: " + std::to_string(maxMem) + "\n";
     std::cout << "Max. CPU usage for proccess: " << maxCPUusage << " [CPU check = " << cpuon << "] " << std::endl;
-    logsFile << "Max. CPU usage for proccess: " << maxCPUusage << " [CPU check = " << cpuon << "] " << std::endl;
+    logsStr += "Max. CPU usage for proccess: " + std::to_string(maxCPUusage) + " [CPU check = " + std::to_string(cpuon) + "] \n";
     if (cores == -1 && cpuon) {
+        std::cout << "\nUnknown number of CPU cores." << std::endl;
+        logsStr += "\nUnknown number of CPU cores.\n";
+        saveLogs();
         return -1;
     }
     usleep(static_cast<int>(sleepBeforeTime * 1000000));
-    logsFile.close();
     if (sleepTime <= 0) {
         sleepTime = 0.01;
     }
     while (true) {
-        logsFile.open("latest.log");
         system("clear");
         std::cout << " BUILD: " << build << std::endl;
-        logsFile << " BUILD: " << build << std::endl;
+        logsStr += " BUILD: " + build + "\n";
         std::cout << " Patch: " << patch << std::endl;
-        logsFile << " Patch: " << patch << std::endl;
+        logsStr += " Patch: " + patch + "\n";
         checkNum++;
         std::cout << checkerStr << "[" << checkNum << "]" << std::endl;
-        logsFile << checkerStr << "[" << checkNum << "]" << std::endl;
+        logsStr += checkerStr + "[" + std::to_string(checkNum) + "]\n";
         std::cout << killedProccessesPatch << "{" << std::endl;
-        logsFile << killedProccessesPatch << "{" << std::endl;
+        logsStr += killedProccessesPatch + "{\n";
         for (auto sStr : killedProccesses) {
           std::cout << sStr << std::endl;
-          logsFile << sStr << std::endl;
+          logsStr += sStr + "\n";
         }
         std::cout << '}' << std::endl;
-        logsFile << '}' << std::endl;
+        logsStr += "}\n";
         std::vector<std::tuple<long, long, float, std::string, std::string>> procceses = get_process_memory_usage(patchCommandChecker);
         if (!procceses.empty())
             for (int i = 0; i < procceses.size(); i++) {
@@ -564,16 +588,19 @@ int main() {
                     killedProccesses.push_back(" [" + proccesPidNow + "] '" + proccesNameStrNow + "'" + " reason [" + typeOfBadStr + "]");
                     if (proccesPidNow == "1") {
                         std::cout << "\nAttention! Kernel's " << typeOfBadStr << " is within limits! Self-killing..." << std::endl;
-                        logsFile << "\nKERNEL" << std::endl;
+                        logsStr += "\nKERNEL\n";
+                        saveLogs();
                         return -1;
                     }
                     std::cout << "Killing PID " << proccesPidNow << " [" << proccesNameStrNow << "] for reason [" << typeOfBadStr << ']' << std::endl;
-                    logsFile << "Killing PID " << proccesPidNow << " [" << proccesNameStrNow << "] for reason [" << typeOfBadStr << ']' << std::endl;
+                    logsStr += "Killing PID " + proccesPidNow + " [" + proccesNameStrNow + "] for reason [" + typeOfBadStr + "]\n";
                     system(command.c_str());
                     typeOfBad = 0;
                 }
             }
-        logsFile.close();
+            logsStr += "\n\n";
+            if (logsStr.size() >= BUFF_MAX_SIZE)
+                saveLogs();
         usleep(static_cast<int>(sleepTime * 1000000));
     }
 }
