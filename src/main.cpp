@@ -22,15 +22,20 @@ std::string logsStr = "";
 
 void saveLogs() {
     std::ofstream file("latest.log");
-    file << logsStr;
-    logsStr = "";
-    printf("Logs saved and logs buffer reset.\n");
+    if (!file)
+        printf("Failed to open logs ofstream file!\n");
+    else {
+        file << logsStr;
+        logsStr = "";
+        printf("Logs saved and logs buffer reset.\n");
+    }
+    file.close();
 }
 
 void handle_sigint(int sig) {
     printf("\nSIGINT received! Saving logs...\n");
     saveLogs();
-    exit(-1);
+    exit(0);
 }
 
 std::vector<std::tuple<long, long, float, std::string, std::string>> get_process_memory_usage(std::string patchCommandChecker) {
@@ -176,7 +181,7 @@ int main() {
     std::thread doNotRunInRootPls(doNotRunInRoot);
     system("clear");
     // BUILD VERSION
-    std::string build = "#3.main";
+    std::string build = "#4.main";
     // $ = Preview; # = Release;
     // after '.' is the name of the branch
     std::cout << " BUILD: " << build << std::endl;
