@@ -32,7 +32,7 @@ sleepBeforeTime=2
 sleepTime=0.5
 ```
 
-- cpuon - boolean (can be used 'true', 'false', '1' and '0'). Turn on/off CPU checker. (Stable preview. You can leave an issue, if you find bug)
+- cpuon - boolean (can be used 'true', 'false', '1' and '0'). Turn on/off CPU checker. (Stable preview. You can leave an issue, if you find a bug)
 ```properties
 cpuon=true
 ```
