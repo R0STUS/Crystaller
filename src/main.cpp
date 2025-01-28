@@ -308,7 +308,7 @@ int main() {
                     else if (sType == "patchCommandChecker") {
                         sType = getNext(tmp);
                         if (!sType.empty()) {
-                            settingsFilename = sType;
+                            patchCommandChecker = sType;
                             patchCommandCheckerBool = true;
                         }
                         else {
@@ -524,7 +524,7 @@ int main() {
         std::cout << '}' << std::endl;
         logsStr += "}\n";
         std::vector<std::tuple<long, long, float, std::string, std::string>> procceses = get_process_memory_usage(patchCommandChecker);
-        if (!procceses.empty())
+        if (!procceses.empty()) {
             for (int i = 0; i < procceses.size(); i++) {
                 isSkipPID = false;
                 isSkipPIDCPU = false;
@@ -536,6 +536,7 @@ int main() {
                 proccesNameStrNow = std::get<3>(procceses[i]);
                 proccesUserNow = std::get<4>(procceses[i]);
                 proccesPidNow = std::to_string(proccesNameNow);
+                // std::cout << "PID: " << proccesPidNow << " Mem: " << proccesMemNow << std::endl; // Debug
                 command += proccesPidNow;
                 for (auto nStr : ignoringNames) {
                     if (proccesNameStrNow == nStr) {
@@ -603,9 +604,12 @@ int main() {
                     typeOfBad = 0;
                 }
             }
-            logsStr += "\n\n";
-            if (logsStr.size() >= BUFF_MAX_SIZE)
-                saveLogs();
+        }
+        else
+            std::cout << "Can't read any process!" << std::endl;
+        logsStr += "\n\n";
+        if (logsStr.size() >= BUFF_MAX_SIZE)
+            saveLogs();
         usleep(static_cast<int>(sleepTime * 1000000));
     }
 }
