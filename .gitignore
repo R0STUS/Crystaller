@@ -30,9 +30,7 @@
 *.exe
 *.out
 *.app
+crystaller
 
 # Config
 settings.properties
-
-# Cache
-*.log
