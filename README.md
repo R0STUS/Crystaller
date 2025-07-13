@@ -34,5 +34,5 @@ ignoreName=chrome
 
 - sleepTime - time in seconds (float not supported) between checks.
 ```properties
-sleepTime=0.5
+sleepTime=1
 ```
