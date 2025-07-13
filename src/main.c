@@ -89,7 +89,7 @@ void handleSigint(int sig) {
         free(ignoringProcs);
     else {
         for (i = 0; i < ignProcsSize; i++) {
-            free(ignoringProcs);
+            free(ignoringProcs[i]);
         }
     }
     free(ignProcsSizes);
