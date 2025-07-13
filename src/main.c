@@ -31,6 +31,7 @@ int sleepTime = 1;
 char** ignoringProcs = NULL;
 int ignProcsSize = 0;
 int* ignProcsSizes = NULL;
+char* logs = NULL;
 
 void changeMaxMem(char* ptr, int size) {
     int i;
@@ -93,6 +94,7 @@ void handleSigint(int sig) {
         }
     }
     free(ignProcsSizes);
+    free(logs);
     exit(sig);
 }
 
@@ -216,20 +218,21 @@ int main() {
     char* cmd;
     int confcode;
     int cycle = 0;
-    char logs[128];
+    int logsSize = 0;
     signal(SIGINT, handleSigint);
     if (isRunningAsRoot()) {
         printf("Do NOT run this as root\n");
         return ROOT;
     }
     /* BUILD VERSION */
-    build = "$7.refactor_to_c90";
+    build = "$8.main";
     /* $ = Preview; # = Release
        after '.' is name of the branch */
     confcode = checkConfig();
     if (confcode != 0) {
         printf("Cannot load config. Using defaults.\n");
     }
+    logs = malloc(3);
     sprintf(logs, " \b");
     sleep(2);
     while (1) {
@@ -255,6 +258,8 @@ int main() {
             }
             if (procs[i].mem >= maxMem && isIgnoring != 1) {
                 cmd = format_string("Killed: PID:%d - %s - %ldMb\n", procs[i].pid, procs[i].name, procs[i].mem);
+                logsSize += strlen(cmd);
+                logs = realloc(logs, logsSize);
                 strcat(logs, cmd);
                 free(cmd);
                 cmd = format_string("kill -9 %d", procs[i].pid);
