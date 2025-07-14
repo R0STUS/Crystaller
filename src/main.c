@@ -225,7 +225,7 @@ int main() {
         return ROOT;
     }
     /* BUILD VERSION */
-    build = "$8.main";
+    build = "#2.0.main";
     /* $ = Preview; # = Release
        after '.' is name of the branch */
     confcode = checkConfig();
