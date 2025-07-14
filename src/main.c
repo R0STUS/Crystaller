@@ -11,8 +11,6 @@
 #define ROOT 1
 #define _POSIX_C_SOURCE 200112L
 
-const char* settingsFile = "~/.config/crystaller/settings.properties";
-
 int isRunningAsRoot() {
     return getuid() == 0;
 }
@@ -35,6 +33,7 @@ char** ignoringProcs = NULL;
 int ignProcsSize = 0;
 int* ignProcsSizes = NULL;
 char* logs = NULL;
+char* settingsFile = ".config/crystaller/settings.properties";
 
 void changeMaxMem(char* ptr, int size) {
     int i;
@@ -101,6 +100,22 @@ void handleSigint(int sig) {
     exit(sig);
 }
 
+char* format_string(const char *fmt, ...) {
+    va_list args;
+    int size;
+    char* buffer;
+    va_start(args, fmt);
+    size = vsnprintf(NULL, 0, fmt, args);
+    va_end(args);
+    if (size < 0) return NULL;
+    buffer = malloc(size + 1);
+    if (!buffer) return NULL;
+    va_start(args, fmt);
+    vsnprintf(buffer, size + 1, fmt, args);
+    va_end(args);
+    return buffer;
+}
+
 int checkConfig() {
     FILE* file;
     char buffer[1024];
@@ -110,7 +125,9 @@ int checkConfig() {
     int i;
     phr[0] = malloc(1);
     phr[1] = malloc(1);
+    settingsFile = format_string("%s/%s", getenv("HOME"), settingsFile);
     file = fopen(settingsFile, "r");
+    free(settingsFile);
     if (file == NULL) {
         fprintf(stderr, "Failed to open '%s' file: %s\n", settingsFile, strerror(errno));
         return 1;
@@ -147,22 +164,6 @@ int checkConfig() {
     free(phr[0]);
     free(phr[1]);
     return 0;
-}
-
-char* format_string(const char *fmt, ...) {
-    va_list args;
-    int size;
-    char* buffer;
-    va_start(args, fmt);
-    size = vsnprintf(NULL, 0, fmt, args);
-    va_end(args);
-    if (size < 0) return NULL;
-    buffer = malloc(size + 1);
-    if (!buffer) return NULL;
-    va_start(args, fmt);
-    vsnprintf(buffer, size + 1, fmt, args);
-    va_end(args);
-    return buffer;
 }
 
 Proc* getProcs(int* procSize) {
