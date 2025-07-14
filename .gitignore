@@ -32,5 +32,9 @@
 *.app
 crystaller
 
+# Release builds
+*.AppDir
+*.AppImage
+
 # Config
 settings.properties
