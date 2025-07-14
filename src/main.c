@@ -6,9 +6,12 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <errno.h>
 
 #define ROOT 1
 #define _POSIX_C_SOURCE 200112L
+
+const char* settingsFile = "~/.config/crystaller/settings.properties";
 
 int isRunningAsRoot() {
     return getuid() == 0;
@@ -107,9 +110,9 @@ int checkConfig() {
     int i;
     phr[0] = malloc(1);
     phr[1] = malloc(1);
-    file = fopen("settings.properties", "r");
+    file = fopen(settingsFile, "r");
     if (file == NULL) {
-        perror("Failed to open 'settings.properties' file");
+        fprintf(stderr, "Failed to open '%s' file: %s\n", settingsFile, strerror(errno));
         return 1;
     }
     while (fgets(buffer, sizeof(buffer), file) != NULL) {
@@ -146,6 +149,22 @@ int checkConfig() {
     return 0;
 }
 
+char* format_string(const char *fmt, ...) {
+    va_list args;
+    int size;
+    char* buffer;
+    va_start(args, fmt);
+    size = vsnprintf(NULL, 0, fmt, args);
+    va_end(args);
+    if (size < 0) return NULL;
+    buffer = malloc(size + 1);
+    if (!buffer) return NULL;
+    va_start(args, fmt);
+    vsnprintf(buffer, size + 1, fmt, args);
+    va_end(args);
+    return buffer;
+}
+
 Proc* getProcs(int* procSize) {
     FILE* file;
     char buffer[256];
@@ -154,7 +173,14 @@ Proc* getProcs(int* procSize) {
     int p;
     int procsSize = 0;
     size_t len;
-    file = popen("memwatch --no-header", "r");
+    char* memwatch;
+    char* appdir = getenv("APPDIR");
+    if (appdir)
+        memwatch = format_string("%s/usr/bin/memwatch --no-header", appdir);
+    else
+        memwatch = format_string("/usr/bin/memwatch --no-header");
+    file = popen(memwatch, "r");
+    free(memwatch);
     if (file == NULL) {
         perror("Failed to open the command");
         return NULL;
@@ -195,22 +221,6 @@ Proc* getProcs(int* procSize) {
     return procs;
 }
 
-char* format_string(const char *fmt, ...) {
-    va_list args;
-    int size;
-    char* buffer;
-    va_start(args, fmt);
-    size = vsnprintf(NULL, 0, fmt, args);
-    va_end(args);
-    if (size < 0) return NULL;
-    buffer = malloc(size + 1);
-    if (!buffer) return NULL;
-    va_start(args, fmt);
-    vsnprintf(buffer, size + 1, fmt, args);
-    va_end(args);
-    return buffer;
-}
-
 int main() {
     char* build;
     int procsSize;
@@ -221,7 +231,7 @@ int main() {
     int logsSize = 0;
     signal(SIGINT, handleSigint);
     if (isRunningAsRoot()) {
-        printf("Do NOT run this as root\n");
+        fprintf(stderr, "Do NOT run this as root!\n");
         return ROOT;
     }
     /* BUILD VERSION */
@@ -230,7 +240,7 @@ int main() {
        after '.' is name of the branch */
     confcode = checkConfig();
     if (confcode != 0) {
-        printf("Cannot load config. Using defaults.\n");
+        fprintf(stderr, "Cannot load config. Using defaults.\n");
     }
     logs = malloc(3);
     sprintf(logs, " \b");

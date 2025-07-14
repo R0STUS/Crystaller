@@ -9,18 +9,19 @@ git clone https://github.com/R0STUS/memwatch
 cd memwatch
 sudo make install
 ```
+
 To build and run Crystaller:
 ```bash
 git clone https://github.com/R0STUS/Crystaller
 cd Crystaller
-chmod +x compile.sh
-./compile.sh
-./crystaller
+chmod +x install.sh
+install.sh
+crystaller
 ```
 
 # Configuration
 
-Create and Edit the 'settings.properties' to configure Crystaller.
+Create and Edit the '~/.config/crystaller/settings.properties' to configure Crystaller.
 - maxMem - set max memory limit.
 ```properties
 maxMem=2048
@@ -28,11 +29,11 @@ maxMem=2048
 
 - ignoreName - set app that will be ignored by Crystaller.
 ```properties
-ignoreName=vesktop
+ignoreName=discord
 ignoreName=chrome
 ```
 
 - sleepTime - time in seconds (float not supported) between checks.
 ```properties
-sleepTime=0.5
+sleepTime=10
 ```
