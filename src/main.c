@@ -29,6 +29,7 @@ typedef struct {
 Proc* procs;
 int maxMem = 2048;
 int sleepTime = 1;
+int sleepBeforeTime = 2;
 char** ignoringProcs = NULL;
 int ignProcsSize = 0;
 int* ignProcsSizes = NULL;
@@ -45,6 +46,7 @@ void changeMaxMem(char* ptr, int size) {
     if (maxMem == 0) {
         maxMem = 2048;
     }
+    printf("maxMem=%d\n", maxMem);
 }
 
 void changeSleepTime(char* ptr, int size) {
@@ -53,10 +55,18 @@ void changeSleepTime(char* ptr, int size) {
     for (i = 0; i < size; i++) {
         if (isdigit(ptr[i]))
             sleepTime = (sleepTime * 10) + ptr[i] - '0';
-    } 
-    if (sleepTime == 0) {
-        sleepTime = 2048;
     }
+    printf("sleepTime=%d\n", sleepTime);
+}
+
+void changeSleepBeforeTime(char* ptr, int size) {
+    int i;
+    sleepBeforeTime = 0;
+    for (i = 0; i < size; i++) {
+        if (isdigit(ptr[i]))
+            sleepBeforeTime = (sleepTime * 10) + ptr[i] - '0';
+    }
+    printf("sleepBeforeTime=%d\n", sleepBeforeTime);
 }
 
 void changeIgnoring(char* ptr, int size) {
@@ -75,6 +85,7 @@ void changeIgnoring(char* ptr, int size) {
     }
     strcpy(ignoringProcs[ignProcsSize - 1], ptr);
     ignoringProcs[ignProcsSize - 1][size] = '\0';
+    printf("Added ignoring process: %s\n", ignoringProcs[ignProcsSize - 1]);
 }
 
 Setting settings[] = {
@@ -245,7 +256,7 @@ int main() {
     }
     logs = malloc(3);
     sprintf(logs, " \b");
-    sleep(2);
+    sleep(sleepBeforeTime);
     while (1) {
         cycle++;
         printf("\x1B[H\x1B[2J");

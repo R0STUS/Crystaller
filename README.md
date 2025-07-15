@@ -37,3 +37,8 @@ ignoreName=chrome
 ```properties
 sleepTime=10
 ```
+
+- sleepBeforeTime - time in seconds (float not supported) before start program (recommended for debug).
+```properties
+sleepBeforeTime=5
+```
