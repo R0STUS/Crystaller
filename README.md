@@ -22,7 +22,7 @@ crystaller
 # Configuration
 
 Create and Edit the '~/.config/crystaller/settings.properties' to configure Crystaller.
-- maxMem - set max memory limit.
+- maxMem - set max memory limit (in Mb).
 ```properties
 maxMem=2048
 ```
