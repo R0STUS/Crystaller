@@ -138,11 +138,11 @@ int checkConfig() {
     phr[1] = malloc(1);
     settingsFile = format_string("%s/%s", getenv("HOME"), settingsFile);
     file = fopen(settingsFile, "r");
-    free(settingsFile);
     if (file == NULL) {
         fprintf(stderr, "Failed to open '%s' file: %s\n", settingsFile, strerror(errno));
         return 1;
     }
+    free(settingsFile);
     while (fgets(buffer, sizeof(buffer), file) != NULL) {
         p = 0;
         for (i = 0; i < (int)strlen(buffer); i++) {

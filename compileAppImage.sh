@@ -1,5 +1,3 @@
-#!/bin/usr/bash
+#!/usr/bin/bash
 
-mkdir -p Crystaller.AppDir/usr/bin/crystaller
-
-gcc src/appImage_main.c -D_POSIX_C_SOURCE=200112L -std=c90 -pedantic-errors -Wall -Wextra -static -o Crystaller.AppDir/usr/bin/crystaller
+gcc src/main.c -D_POSIX_C_SOURCE=200112L -std=c90 -pedantic-errors -Wall -Wextra -static -o crystaller.AppDir/usr/bin/crystaller
