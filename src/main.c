@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <time.h>
 
 #define ROOT 1
 #define _POSIX_C_SOURCE 200112L
@@ -28,7 +29,7 @@ typedef struct {
 
 Proc* procs;
 int maxMem = 2048;
-int sleepTime = 1;
+float sleepTime = 1;
 int sleepBeforeTime = 2;
 char** ignoringProcs = NULL;
 int ignProcsSize = 0;
@@ -50,13 +51,11 @@ void changeMaxMem(char* ptr, int size) {
 }
 
 void changeSleepTime(char* ptr, int size) {
-    int i;
-    sleepTime = 0;
-    for (i = 0; i < size; i++) {
-        if (isdigit(ptr[i]))
-            sleepTime = (sleepTime * 10) + ptr[i] - '0';
-    }
-    printf("sleepTime=%d\n", sleepTime);
+    char* endptr;
+    float value = strtof(ptr, &endptr);
+    if (ptr != endptr)
+        sleepTime = value;
+    printf("sleepTime=%f\n", sleepTime);
 }
 
 void changeSleepBeforeTime(char* ptr, int size) {
@@ -233,13 +232,20 @@ Proc* getProcs(int* procSize) {
     return procs;
 }
 
+void sleepf(float seconds) {
+    struct timespec req;
+    req.tv_sec = (time_t)seconds;
+    req.tv_nsec = (long)((seconds - req.tv_sec) * 1e9);
+    nanosleep(&req, NULL);
+}
+
 int main() {
     char* build;
     int procsSize;
     int i; int j; int isIgnoring;
     char* cmd;
     int confcode;
-    int cycle = 0;
+    long cycle = 0;
     int logsSize = 0;
     signal(SIGINT, handleSigint);
     if (isRunningAsRoot()) {
@@ -261,7 +267,7 @@ int main() {
         cycle++;
         printf("\x1B[H\x1B[2J");
         printf(" BUILD: %s\n", build);
-        printf(" Logs: {\n%s }\n Crystaller [%d]\n", logs, cycle);
+        printf(" Logs: {\n%s }\n Crystaller is working [%ld]\n", logs, cycle);
         procs = getProcs(&procsSize);
         for (i = 0; i < procsSize; i++) {
             isIgnoring = 0;
@@ -289,6 +295,6 @@ int main() {
                 free(cmd);
             }
         }
-        sleep(sleepTime);
+        sleepf(sleepTime);
     }
 }
