@@ -33,9 +33,9 @@ ignoreName=discord
 ignoreName=chrome
 ```
 
-- sleepTime - time in seconds (float not supported) between checks.
+- sleepTime - time in seconds (float also supported) between checks.
 ```properties
-sleepTime=10
+sleepTime=10.5
 ```
 
 - sleepBeforeTime - time in seconds (float not supported) before start program (recommended for debug).
