@@ -246,7 +246,6 @@ int main() {
     char* cmd;
     int confcode;
     long cycle = 0;
-    int logsSize = 0;
     signal(SIGINT, handleSigint);
     if (isRunningAsRoot()) {
         fprintf(stderr, "Do NOT run this as root!\n");
@@ -273,11 +272,9 @@ int main() {
             isIgnoring = 0;
             for (j = 0; j < ignProcsSize; j++) {
                 if (ignoringProcs[j] == NULL) {
-                    printf("Something went wrong - %d from %d\n", j, ignProcsSize);
                     break;
                 }
                 else if (procs[i].name == NULL) {
-                    printf("This process is shit\n");
                     break;
                 }
                 if (strcmp(ignoringProcs[j], procs[i].name) == 0) {
@@ -285,11 +282,12 @@ int main() {
                 }
             }
             if (procs[i].mem >= maxMem && isIgnoring != 1) {
-                cmd = format_string("Killed: PID:%d - %s - %ldMb\n", procs[i].pid, procs[i].name, procs[i].mem);
-                logsSize += strlen(cmd);
-                logs = realloc(logs, logsSize);
-                strcat(logs, cmd);
-                free(cmd);
+                logs = format_string("%s\nKilled: PID:%d - %s - %ldMb\n", logs, procs[i].pid, procs[i].name, procs[i].mem);
+                if (logs == NULL) {
+                    fprintf(stderr, "Error, while formatting logs.\n");
+                    logs = malloc(3);
+                    sprintf(logs, " \b");
+                }
                 cmd = format_string("kill -9 %d", procs[i].pid);
                 system(cmd);
                 free(cmd);
