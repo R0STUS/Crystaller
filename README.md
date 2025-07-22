@@ -15,7 +15,7 @@ To build and run Crystaller:
 git clone https://github.com/R0STUS/Crystaller
 cd Crystaller
 chmod +x install.sh
-install.sh
+./install.sh
 crystaller
 ```
 
