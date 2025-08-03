@@ -264,7 +264,7 @@ int main() {
     sleep(sleepBeforeTime);
     while (1) {
         cycle++;
-        printf("\x1B[H\x1B[2J");
+        printf("\x1B[H\x1B[2J\x1B[3J");
         printf(" BUILD: %s\n", build);
         printf(" Logs: {\n%s }\n Crystaller is working [%ld]\n", logs, cycle);
         procs = getProcs(&procsSize);
