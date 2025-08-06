@@ -40,6 +40,7 @@ char** ignoringProcs = NULL;
 int ignProcsSize = 0;
 int* ignProcsSizes = NULL;
 char* logs = NULL;
+int procsSize;
 char* settingsFile = ".config/crystaller/settings.properties";
 
 void changeMaxMem(char* ptr, int size) {
@@ -111,8 +112,16 @@ void handleSigint(int sig) {
         }
     }
     free(ignProcsSizes);
-    free(logs);
-    free(build);
+    if (logs)
+        free(logs);
+    if (build)
+        free(build);
+    if (procsSize > 0) {
+        for (i = 0; i < procsSize; i++) {
+            free(procs[i].name);
+        }
+        free(procs);
+    }
     exit(sig);
 }
 
@@ -248,7 +257,6 @@ void sleepf(float seconds) {
 }
 
 int main() {
-    int procsSize;
     int i; int j; int isIgnoring;
     char* cmd;
     int confcode;
@@ -270,7 +278,12 @@ int main() {
         printf("\x1B[H\x1B[2J\x1B[3J");
         printf(" BUILD: %s\n", build);
         printf(" Logs: {\n%s }\n Crystaller is working [%ld]\n", logs, cycle);
-        free(procs);
+        if (procsSize > 0) {
+            for (i = 0; i < procsSize; i++) {
+                free(procs[i].name);
+            }
+            free(procs);
+        }
         procs = getProcs(&procsSize);
         for (i = 0; i < procsSize; i++) {
             isIgnoring = 0;
