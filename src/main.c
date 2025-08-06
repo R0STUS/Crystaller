@@ -27,6 +27,11 @@ typedef struct {
     long mem;
 } Proc;
 
+/* BUILD VERSION */
+char* build = "#2.3.main";
+/* $ = Preview; # = Release
+   after '.' is name of the branch */
+
 Proc* procs;
 int maxMem = 2048;
 float sleepTime = 1;
@@ -107,6 +112,7 @@ void handleSigint(int sig) {
     }
     free(ignProcsSizes);
     free(logs);
+    free(build);
     exit(sig);
 }
 
@@ -186,10 +192,12 @@ Proc* getProcs(int* procSize) {
     size_t len;
     char* memwatch;
     char* appdir = getenv("APPDIR");
-    if (appdir)
+    if (appdir) {
         memwatch = format_string("%s/usr/bin/memwatch --no-header", appdir);
+        free(appdir);
+    }
     else
-        memwatch = format_string("/usr/bin/memwatch --no-header");
+        memwatch = format_string("memwatch --no-header");
     file = popen(memwatch, "r");
     free(memwatch);
     if (file == NULL) {
@@ -240,7 +248,6 @@ void sleepf(float seconds) {
 }
 
 int main() {
-    char* build;
     int procsSize;
     int i; int j; int isIgnoring;
     char* cmd;
@@ -251,10 +258,6 @@ int main() {
         fprintf(stderr, "Do NOT run this as root!\n");
         return ROOT;
     }
-    /* BUILD VERSION */
-    build = "#2.1.main";
-    /* $ = Preview; # = Release
-       after '.' is name of the branch */
     confcode = checkConfig();
     if (confcode != 0) {
         fprintf(stderr, "Cannot load config. Using defaults.\n");
@@ -267,6 +270,7 @@ int main() {
         printf("\x1B[H\x1B[2J\x1B[3J");
         printf(" BUILD: %s\n", build);
         printf(" Logs: {\n%s }\n Crystaller is working [%ld]\n", logs, cycle);
+        free(procs);
         procs = getProcs(&procsSize);
         for (i = 0; i < procsSize; i++) {
             isIgnoring = 0;
@@ -282,7 +286,7 @@ int main() {
                 }
             }
             if (procs[i].mem >= maxMem && isIgnoring != 1) {
-                logs = format_string("%s\nKilled: PID:%d - %s - %ldMb\n", logs, procs[i].pid, procs[i].name, procs[i].mem);
+                logs = format_string("%s  Killed: PID:%d - %s - %ldMb\n", logs, procs[i].pid, procs[i].name, procs[i].mem);
                 if (logs == NULL) {
                     fprintf(stderr, "Error, while formatting logs.\n");
                     logs = malloc(3);
