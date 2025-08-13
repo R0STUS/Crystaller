@@ -28,7 +28,7 @@ typedef struct {
 } Proc;
 
 /* BUILD VERSION */
-char* build = "#2.3.main";
+char* build = "#2.4.main";
 /* $ = Preview; # = Release
    after '.' is name of the branch */
 
@@ -102,8 +102,7 @@ Setting settings[] = {
 
 void handleSigint(int sig) {
     int i;
-    printf("\nSIGINT received! Clearing memory...\n");
-    free(procs);
+    printf("\nSignal %d received! Clearing memory...\n", sig);
     if (ignProcsSize == 0)
         free(ignoringProcs);
     else {
@@ -114,8 +113,6 @@ void handleSigint(int sig) {
     free(ignProcsSizes);
     if (logs)
         free(logs);
-    if (build)
-        free(build);
     if (procsSize > 0) {
         for (i = 0; i < procsSize; i++) {
             free(procs[i].name);
@@ -283,6 +280,7 @@ int main() {
                 free(procs[i].name);
             }
             free(procs);
+            procsSize = 0;
         }
         procs = getProcs(&procsSize);
         for (i = 0; i < procsSize; i++) {
