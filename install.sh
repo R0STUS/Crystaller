@@ -14,5 +14,9 @@ if [ -e "$BIN/$OUTPUT" ]; then
     printf "File exists as '$BIN/$OUTPUT', deleting...\n"
     sudo rm "$BIN/$OUTPUT"
 fi
-printf "Moving $OUTPUT to $BIN...\n"
-sudo mv $OUTPUT "$BIN/$OUTPUT"
+if [ -e "$BIN/$OUTPUT" ]; then
+    printf "Could not delete '$BIN/$OUTPUT'.\n"
+else
+    printf "Moving $OUTPUT to $BIN...\n"
+    sudo mv $OUTPUT "$BIN/$OUTPUT"
+fi
