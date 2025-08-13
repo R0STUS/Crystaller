@@ -19,6 +19,9 @@ chmod +x install.sh
 crystaller
 ```
 
+## For AppImage
+You do NOT need memwatch. The AppImage is fully static.
+
 # Configuration
 
 Create and Edit the '~/.config/crystaller/settings.properties' to configure Crystaller.
