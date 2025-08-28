@@ -190,8 +190,8 @@ int checkConfig() {
         phrSize[0] = epos;
         phr[0] = malloc(phrSize[0]);
         snprintf(phr[0], (size_t)phrSize[0] + 1, "%s", buffer);
-        phrSize[1] = (int)strlen(buffer) - epos + 1;
-        snprintf(phr[1], (size_t)phrSize[1] + 1, "%s", buffer + epos + 1);
+        phrSize[1] = (int)strlen(buffer) - epos;
+        snprintf(phr[1], (size_t)phrSize[1], "%s", buffer + epos + 1);
         if (removeNs(&phr[1], &phrSize[1]) != 0)
             return -1;
         for (i = 0; settings[i].name != NULL; i++) {
@@ -213,7 +213,9 @@ Proc* getProcs(int* procSize) {
     Proc* procs = malloc(1 * sizeof(Proc));
     int i;
     int p;
+    char* tmp;
     int procsSize = 0;
+    int poss[2] = {-1, -1};
     size_t len;
     char* memwatch;
     char* appdir = getenv("APPDIR");
@@ -232,32 +234,28 @@ Proc* getProcs(int* procSize) {
     while (fgets(buffer, sizeof(buffer), file) != NULL) {
         procsSize++;
         procs = realloc(procs, procsSize * sizeof(Proc));
-        procs[procsSize - 1].pid = 0;
-        procs[procsSize - 1].name = malloc(1); procs[procsSize - 1].name[0] = '\0';
-        procs[procsSize - 1].mem = 0;
         p = 0;
         for (i = 0; i < (int)strlen(buffer); i++) {
             if (buffer[i] == '\t') {
+                poss[p] = i;
                 p++;
-                if (p > 2)
+                if (p > 1)
                     break;
-                continue;
-            }
-            if (p == 0) {
-                procs[procsSize - 1].pid *= 10;
-                procs[procsSize - 1].pid += buffer[i] - '0';
-            }
-            if (p == 1) {
-                len = strlen(procs[procsSize - 1].name);
-                procs[procsSize - 1].name = realloc(procs[procsSize - 1].name, len + 2);
-                procs[procsSize - 1].name[len] = buffer[i];
-                procs[procsSize - 1].name[len + 1] = '\0';
-            }
-            if (p == 2 && isdigit(buffer[i])) {
-                procs[procsSize - 1].mem *= 10;
-                procs[procsSize - 1].mem += buffer[i] - '0';
             }
         }
+        if (poss[0] == -1 || poss[1] == -1)
+            continue;
+        tmp = malloc(poss[0] + 1);
+        snprintf(tmp, poss[0] + 1, "%s", buffer);
+        procs[procsSize - 1].pid = atoi(tmp);
+        free(tmp);
+        len = poss[1] - poss[0];
+        procs[procsSize - 1].name = malloc(len);
+        snprintf(procs[procsSize - 1].name, len, "%s", buffer + poss[0] + 1);
+        tmp = malloc(strlen(buffer + poss[1] + 1));
+        snprintf(tmp, strlen(buffer + poss[1] + 1) + 1, "%s", buffer + poss[1] + 1);
+        procs[procsSize - 1].mem = atol(tmp);
+        free(tmp);
         procs[procsSize - 1].mem /= 1024;
     }
     pclose(file);
