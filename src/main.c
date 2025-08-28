@@ -28,7 +28,7 @@ typedef struct {
 } Proc;
 
 /* BUILD VERSION */
-char* build = "#2.4.main";
+char* build = "#2.5.main";
 /* $ = Preview; # = Release
    after '.' is name of the branch */
 
@@ -221,7 +221,6 @@ Proc* getProcs(int* procSize) {
     char* appdir = getenv("APPDIR");
     if (appdir) {
         memwatch = format_string("%s/usr/bin/memwatch --no-header", appdir);
-        free(appdir);
     }
     else
         memwatch = format_string("memwatch --no-header");
