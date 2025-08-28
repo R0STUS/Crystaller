@@ -138,15 +138,36 @@ char* format_string(const char *fmt, ...) {
     return buffer;
 }
 
+int removeNs(char** dest, int* size) {
+    int i;
+    for (i = 0; i < *size; i++) {
+        if ((*dest)[i] == '\n') {
+            (*dest)[i] = '\0';
+            *size = i + 1;
+            *dest = realloc(*dest, *size);
+            if (*dest == NULL) {
+                fprintf(stderr, "Cannot allocate memory!\n");
+                return -1;
+            }
+            break;
+        }
+    }
+    return 0;
+}
+
 int checkConfig() {
     FILE* file;
     char buffer[1024];
     char* phr[2];
     int phrSize[2] = {0, 0};
-    int p;
     int i;
+    int epos;
     phr[0] = malloc(1);
     phr[1] = malloc(1);
+    if (phr[0] == NULL || phr[1] == NULL) {
+        fprintf(stderr, "Failed to allocate memory!\n");
+        return -1;
+    }
     settingsFile = format_string("%s/%s", getenv("HOME"), settingsFile);
     file = fopen(settingsFile, "r");
     if (file == NULL) {
@@ -155,34 +176,32 @@ int checkConfig() {
     }
     free(settingsFile);
     while (fgets(buffer, sizeof(buffer), file) != NULL) {
-        p = 0;
+        epos = -1;
         for (i = 0; i < (int)strlen(buffer); i++) {
-            if (buffer[i] == '=' && p == 0) {
-                p++;
-                continue;
+            if (buffer[i] == '=') {
+                epos = i;
+                break;
             }
             if (buffer[i] == '\n')
                 continue;
-            phrSize[p]++;
-            phr[p] = realloc(phr[p], phrSize[p]);
-            phr[p][phrSize[p] - 1] = buffer[i];
         }
-        phrSize[0]++;
-        phrSize[1]++;
-        phr[0] = realloc(phr[0], phrSize[0]);
-        phr[0][phrSize[0] - 1] = '\0';
-        phr[1] = realloc(phr[1], phrSize[1]);
-        phr[1][phrSize[1] - 1] = '\0';
+        if (epos == -1)
+            continue;
+        phrSize[0] = epos;
+        phr[0] = malloc(phrSize[0]);
+        snprintf(phr[0], (size_t)phrSize[0] + 1, "%s", buffer);
+        phrSize[1] = (int)strlen(buffer) - epos + 1;
+        snprintf(phr[1], (size_t)phrSize[1] + 1, "%s", buffer + epos + 1);
+        if (removeNs(&phr[1], &phrSize[1]) != 0)
+            return -1;
         for (i = 0; settings[i].name != NULL; i++) {
             if (strcmp(phr[0], settings[i].name) == 0) {
                 settings[i].execute(phr[1], phrSize[1]);
             }
         }
-        phrSize[0] = 0;
-        phrSize[1] = 0;
-        phr[0] = malloc(1);
-        phr[1] = malloc(1);
     }
+    phrSize[0] = 0;
+    phrSize[1] = 0;
     free(phr[0]);
     free(phr[1]);
     return 0;
